@@ -4,7 +4,7 @@ import '../providers/cart_model.dart';
 import '../providers/product_model.dart';
 import '../screens/product_detail_screen.dart';
 
-class ProductItem extends StatelessWidget {
+class ProductTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<ProductModel>(context, listen: false);
@@ -13,8 +13,7 @@ class ProductItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context)
-              .pushNamed(ProductDetailScreen.routeName, arguments: product.id);
+          Navigator.of(context).pushNamed(ProductDetailScreen.routeName, arguments: product.id);
         },
         child: GridTile(
           child: Image.network(
@@ -24,9 +23,7 @@ class ProductItem extends StatelessWidget {
           footer: GridTileBar(
             leading: Consumer<ProductModel>(
               builder: (_, product, child) => IconButton(
-                icon: Icon(product.isFavorite
-                    ? Icons.favorite
-                    : Icons.favorite_border),
+                icon: Icon(product.isFavorite ? Icons.favorite : Icons.favorite_border),
                 color: Theme.of(context).accentColor,
                 onPressed: () {
                   product.toggleFavoriteStatus();
@@ -38,6 +35,17 @@ class ProductItem extends StatelessWidget {
               color: Theme.of(context).accentColor,
               onPressed: () {
                 cart.addItem(product.id, product.price, product.title);
+                Scaffold.of(context).hideCurrentSnackBar();
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Added item to cart!'),
+                    duration: Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () => cart.removeSingleItem(product.id),
+                    ),
+                  ),
+                );
               },
             ),
             backgroundColor: Colors.black87,

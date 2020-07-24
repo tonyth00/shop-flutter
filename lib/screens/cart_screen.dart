@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/cart_model.dart' show CartModel;
-import '../widgets/cart_item.dart';
+import '../providers/cart_model.dart';
+import '../widgets/cart_list_tile.dart';
+import '../providers/orders_model.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -26,14 +27,18 @@ class CartScreen extends StatelessWidget {
                   Spacer(),
                   Chip(
                     label: Text(
-                      '\$${cart.totalPrice}',
+                      '\$${cart.totalPrice.toStringAsFixed(2)}',
                       style: TextStyle(color: Theme.of(context).primaryTextTheme.headline6.color),
                     ),
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   FlatButton(
                     child: Text('Order Now'),
-                    onPressed: () {},
+                    onPressed: () {
+                      Provider.of<OrdersModel>(context, listen: false)
+                          .addOrder(items, cart.totalPrice);
+                      cart.clear();
+                    },
                     textColor: Theme.of(context).primaryColor,
                   ),
                 ],
@@ -44,8 +49,8 @@ class CartScreen extends StatelessWidget {
           SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              itemBuilder: (ctx, i) =>
-                  CartItem(items[i].id, productIds[i], items[i].price, items[i].quantity, items[i].title),
+              itemBuilder: (ctx, i) => CartListTile(
+                  items[i].id, productIds[i], items[i].price, items[i].quantity, items[i].title),
               itemCount: cart.items.length,
             ),
           ),

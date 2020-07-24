@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_model.dart';
 
-class CartItem extends StatelessWidget {
+class CartListTile extends StatelessWidget {
   final String id;
   final String productId;
   final double price;
   final int quantity;
   final String title;
 
-  CartItem(this.id, this.productId, this.price, this.quantity, this.title);
+  CartListTile(this.id, this.productId, this.price, this.quantity, this.title);
 
   @override
   Widget build(BuildContext context) {

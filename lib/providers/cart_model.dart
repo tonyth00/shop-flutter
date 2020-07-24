@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 
-class CartItem {
+class CartEntry {
   final String id;
   final String title;
   final int quantity;
   final double price;
 
-  CartItem({
+  CartEntry({
     @required this.id,
     @required this.title,
     @required this.quantity,
@@ -15,9 +15,9 @@ class CartItem {
 }
 
 class CartModel with ChangeNotifier {
-  Map<String, CartItem> _items = {};
+  Map<String, CartEntry> _items = {};
 
-  Map<String, CartItem> get items {
+  Map<String, CartEntry> get items {
     return {..._items};
   }
 
@@ -37,21 +37,20 @@ class CartModel with ChangeNotifier {
     return total;
   }
 
-
   void addItem(String productId, double price, String title) {
     if (_items.containsKey(productId)) {
       _items.update(
         productId,
-        (existingCartItem) => CartItem(
-            id: existingCartItem.id,
-            title: existingCartItem.title,
-            price: existingCartItem.price,
-            quantity: existingCartItem.quantity + 1),
+        (existingEntry) => CartEntry(
+            id: existingEntry.id,
+            title: existingEntry.title,
+            price: existingEntry.price,
+            quantity: existingEntry.quantity + 1),
       );
     } else {
       _items.putIfAbsent(
         productId,
-        () => CartItem(
+        () => CartEntry(
           id: DateTime.now().toString(),
           title: title,
           price: price,
@@ -62,8 +61,31 @@ class CartModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeItem(String id) {
-    _items.remove(id);
+  void removeItem(String productId) {
+    _items.remove(productId);
+    notifyListeners();
+  }
+
+  void removeSingleItem(String productId) {
+    if (!_items.containsKey(productId)) return;
+
+    if (_items[productId].quantity > 1) {
+      _items.update(
+        productId,
+        (existingEntry) => CartEntry(
+            id: existingEntry.id,
+            title: existingEntry.title,
+            price: existingEntry.price,
+            quantity: existingEntry.quantity - 1),
+      );
+    } else {
+      _items.remove(productId);
+    }
+    notifyListeners();
+  }
+
+  void clear() {
+    _items.clear();
     notifyListeners();
   }
 }
