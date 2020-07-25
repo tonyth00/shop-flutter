@@ -12,6 +12,20 @@ class CartEntry {
     @required this.quantity,
     @required this.price,
   });
+
+  CartEntry copyWith({
+    String id,
+    String title,
+    int quantity,
+    double price,
+  }) {
+    return CartEntry(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      quantity: quantity ?? this.quantity,
+      price: price ?? this.price,
+    );
+  }
 }
 
 class CartModel with ChangeNotifier {
@@ -41,11 +55,7 @@ class CartModel with ChangeNotifier {
     if (_items.containsKey(productId)) {
       _items.update(
         productId,
-        (existingEntry) => CartEntry(
-            id: existingEntry.id,
-            title: existingEntry.title,
-            price: existingEntry.price,
-            quantity: existingEntry.quantity + 1),
+        (existingEntry) => existingEntry.copyWith(quantity: existingEntry.quantity + 1),
       );
     } else {
       _items.putIfAbsent(

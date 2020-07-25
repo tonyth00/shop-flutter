@@ -8,8 +8,7 @@ class ProductsModel with ChangeNotifier {
       title: 'Red Shirt',
       description: 'A red shirt - it is pretty red!',
       price: 29.99,
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
+      imageUrl: 'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
     ),
     ProductModel(
       id: 'p2',
@@ -24,8 +23,7 @@ class ProductsModel with ChangeNotifier {
       title: 'Yellow Scarf',
       description: 'Warm and cozy - exactly what you need for the winter.',
       price: 19.99,
-      imageUrl:
-          'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
+      imageUrl: 'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
     ),
     ProductModel(
       id: 'p4',
@@ -49,8 +47,24 @@ class ProductsModel with ChangeNotifier {
     return _items.firstWhere((item) => item.id == id);
   }
 
-  void toggleFavoriteStatus(String id) {
-    findById(id).isFavorite = !findById(id).isFavorite;
+  void addProduct(ProductModel product) {
+    _items.add(product.copyWith(id: DateTime.now().toString()));
+
+    notifyListeners();
+  }
+
+  void updateProduct(String id, ProductModel newProduct) {
+    final prodIndex = _items.indexWhere((product) => product.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = newProduct;
+      notifyListeners();
+    } else {
+      print('Cannot find product');
+    }
+  }
+
+  void deleteProduct(String id) {
+    _items.removeWhere((product) => product.id == id);
     notifyListeners();
   }
 }
