@@ -34,6 +34,24 @@ class ProductModel with ChangeNotifier {
     );
   }
 
+  ProductModel.fromMap(Map<String, dynamic> map)
+      : id = map['id'],
+        title = map['title'],
+        description = map['description'],
+        price = map['price'],
+        imageUrl = map['imageUrl'],
+        isFavorite = map['isFavorite'];
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'price': price,
+      'isFavorite': isFavorite,
+    };
+  }
+
   void toggleFavoriteStatus() {
     isFavorite = !isFavorite;
     notifyListeners();
