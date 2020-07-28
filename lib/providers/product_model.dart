@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import '../models/http_exception.dart';
 
 class ProductModel with ChangeNotifier {
   final String id;
@@ -34,8 +37,8 @@ class ProductModel with ChangeNotifier {
     );
   }
 
-  ProductModel.fromMap(Map<String, dynamic> map)
-      : id = map['id'],
+  ProductModel.fromMap(String id, Map<String, dynamic> map)
+      : id = id,
         title = map['title'],
         description = map['description'],
         price = map['price'],
@@ -52,8 +55,23 @@ class ProductModel with ChangeNotifier {
     };
   }
 
-  void toggleFavoriteStatus() {
+  void toggleFavoriteStatus() async {
+    final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
+
+    try {
+      final res = await http.patch(
+        'https://storage-253004.firebaseio.com/products/$id.json',
+        body: json.encode({'isFavorite': isFavorite}),
+      );
+
+      if (res.statusCode >= 400) {
+        throw HttpException('Could not update isFavorite');
+      }
+    } catch (_) {
+      isFavorite = oldStatus;
+      notifyListeners();
+    }
   }
 }

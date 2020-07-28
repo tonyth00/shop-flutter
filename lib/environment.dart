@@ -1,0 +1,1 @@
+const firebaseEndpoint = 'https://storage-253004.firebaseio.com';

@@ -13,6 +13,12 @@ class CartEntry {
     @required this.price,
   });
 
+  CartEntry.fromMap(Map<String, dynamic> map)
+      : id = map['id'],
+        title = map['title'],
+        quantity = map['quantity'],
+        price = map['price'];
+
   CartEntry copyWith({
     String id,
     String title,
@@ -25,6 +31,15 @@ class CartEntry {
       quantity: quantity ?? this.quantity,
       price: price ?? this.price,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'quantity': quantity,
+      'price': price,
+    };
   }
 }
 
@@ -45,8 +60,8 @@ class CartModel with ChangeNotifier {
 
   double get totalPrice {
     double total = 0.0;
-    _items.forEach((key, item) {
-      total += item.price * item.quantity;
+    _items.values.forEach((entry) {
+      total += entry.price * entry.quantity;
     });
     return total;
   }

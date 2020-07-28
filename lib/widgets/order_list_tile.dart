@@ -25,8 +25,8 @@ class _OrderListTileState extends State<OrderListTile> {
       child: Column(
         children: <Widget>[
           ListTile(
-            title: Text('\$${widget.order.amount}'),
-            subtitle: Text(DateFormat('dd/MM/yyyy hh:mm').format(widget.order.dateTime)),
+            title: Text('\$${widget.order.totalPrice}'),
+            subtitle: Text(DateFormat('dd/MM/yyyy hh:mm a').format(widget.order.dateTime)),
             trailing: IconButton(
               icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
               onPressed: () {

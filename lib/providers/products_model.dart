@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'product_model.dart';
+import 'package:shop/models/http_exception.dart';
+import './product_model.dart';
+import '../environment.dart';
 
 class ProductsModel with ChangeNotifier {
   List<ProductModel> _items = [
@@ -37,8 +39,6 @@ class ProductsModel with ChangeNotifier {
     // ),
   ];
 
-  static const _productsEndpoint = 'https://storage-253004.firebaseio.com/products.json';
-
   List<ProductModel> get items {
     return [..._items];
   }
@@ -52,26 +52,34 @@ class ProductsModel with ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    final response = await http.get(_productsEndpoint);
+    final response = await http.get('$firebaseEndpoint/products.json');
     final data = json.decode(response.body) as Map<String, dynamic>;
     final loadedProducts = <ProductModel>[];
-    data.forEach((id, value) {
-      loadedProducts.add(ProductModel.fromMap(value));
-    });
+    if (data != null) {
+      data.forEach((id, value) {
+        loadedProducts.add(ProductModel.fromMap(id, value));
+      });
+    }
+
     _items = loadedProducts;
     notifyListeners();
   }
 
   Future<void> addProduct(ProductModel product) async {
-    final response = await http.post(_productsEndpoint, body: json.encode(product.toMap()));
+    final response =
+        await http.post('$firebaseEndpoint/products.json', body: json.encode(product.toMap()));
     final id = json.decode(response.body)['name'];
     _items.add(product.copyWith(id: id));
     notifyListeners();
   }
 
-  void updateProduct(String id, ProductModel newProduct) {
+  Future<void> updateProduct(String id, ProductModel newProduct) async {
     final prodIndex = _items.indexWhere((product) => product.id == id);
     if (prodIndex >= 0) {
+      await http.patch(
+        '$firebaseEndpoint/products/$id.json',
+        body: json.encode(newProduct.toMap()),
+      );
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -79,8 +87,19 @@ class ProductsModel with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((product) => product.id == id);
+  Future<void> deleteProduct(String id) async {
+    final index = _items.indexWhere((product) => product.id == id);
+    final removedProduct = _items.removeAt(index);
     notifyListeners();
+    try {
+      final res = await http.delete('$firebaseEndpoint/products/$id.jsona');
+      if (res.statusCode >= 400) {
+        throw HttpException('Could not delete product.');
+      }
+    } catch (err) {
+      _items.insert(index, removedProduct);
+      notifyListeners();
+      throw HttpException(err);
+    }
   }
 }
