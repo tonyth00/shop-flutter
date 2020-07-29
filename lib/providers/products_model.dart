@@ -56,6 +56,7 @@ class ProductsModel with ChangeNotifier {
     final data = json.decode(response.body) as Map<String, dynamic>;
     final loadedProducts = <ProductModel>[];
     if (data != null) {
+      print(data);
       data.forEach((id, value) {
         loadedProducts.add(ProductModel.fromMap(id, value));
       });
