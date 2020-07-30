@@ -55,14 +55,14 @@ class ProductModel with ChangeNotifier {
     };
   }
 
-  void toggleFavoriteStatus() async {
+  void toggleFavoriteStatus(String authToken) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
 
     try {
       final res = await http.patch(
-        'https://storage-253004.firebaseio.com/products/$id.json',
+        'https://storage-253004.firebaseio.com/products/$id.json?auth=$authToken',
         body: json.encode({'isFavorite': isFavorite}),
       );
 

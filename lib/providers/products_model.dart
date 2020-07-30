@@ -6,38 +6,11 @@ import './product_model.dart';
 import '../environment.dart';
 
 class ProductsModel with ChangeNotifier {
-  List<ProductModel> _items = [
-    // ProductModel(
-    //   id: 'p1',
-    //   title: 'Red Shirt',
-    //   description: 'A red shirt - it is pretty red!',
-    //   price: 29.99,
-    //   imageUrl: 'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    // ),
-    // ProductModel(
-    //   id: 'p2',
-    //   title: 'Trousers',
-    //   description: 'A nice pair of trousers.',
-    //   price: 59.99,
-    //   imageUrl:
-    //       'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-    // ),
-    // ProductModel(
-    //   id: 'p3',
-    //   title: 'Yellow Scarf',
-    //   description: 'Warm and cozy - exactly what you need for the winter.',
-    //   price: 19.99,
-    //   imageUrl: 'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    // ),
-    // ProductModel(
-    //   id: 'p4',
-    //   title: 'A Pan',
-    //   description: 'Prepare any meal you want.',
-    //   price: 49.99,
-    //   imageUrl:
-    //       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    // ),
-  ];
+  final authToken;
+
+  ProductsModel(this.authToken, this._items);
+
+  List<ProductModel> _items = [];
 
   List<ProductModel> get items {
     return [..._items];
@@ -52,11 +25,10 @@ class ProductsModel with ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    final response = await http.get('$firebaseEndpoint/products.json');
+    final response = await http.get('$firebaseEndpoint/products.json?auth=$authToken');
     final data = json.decode(response.body) as Map<String, dynamic>;
     final loadedProducts = <ProductModel>[];
     if (data != null) {
-      print(data);
       data.forEach((id, value) {
         loadedProducts.add(ProductModel.fromMap(id, value));
       });
@@ -68,7 +40,7 @@ class ProductsModel with ChangeNotifier {
 
   Future<void> addProduct(ProductModel product) async {
     final response =
-        await http.post('$firebaseEndpoint/products.json', body: json.encode(product.toMap()));
+        await http.post('$firebaseEndpoint/products.json?auth=$authToken', body: json.encode(product.toMap()));
     final id = json.decode(response.body)['name'];
     _items.add(product.copyWith(id: id));
     notifyListeners();
@@ -78,7 +50,7 @@ class ProductsModel with ChangeNotifier {
     final prodIndex = _items.indexWhere((product) => product.id == id);
     if (prodIndex >= 0) {
       await http.patch(
-        '$firebaseEndpoint/products/$id.json',
+        '$firebaseEndpoint/products/$id.json?auth=$authToken',
         body: json.encode(newProduct.toMap()),
       );
       _items[prodIndex] = newProduct;
@@ -93,7 +65,7 @@ class ProductsModel with ChangeNotifier {
     final removedProduct = _items.removeAt(index);
     notifyListeners();
     try {
-      final res = await http.delete('$firebaseEndpoint/products/$id.jsona');
+      final res = await http.delete('$firebaseEndpoint/products/$id.json?auth=$authToken');
       if (res.statusCode >= 400) {
         throw HttpException('Could not delete product.');
       }
@@ -104,3 +76,34 @@ class ProductsModel with ChangeNotifier {
     }
   }
 }
+
+// ProductModel(
+//   id: 'p1',
+//   title: 'Red Shirt',
+//   description: 'A red shirt - it is pretty red!',
+//   price: 29.99,
+//   imageUrl: 'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
+// ),
+// ProductModel(
+//   id: 'p2',
+//   title: 'Trousers',
+//   description: 'A nice pair of trousers.',
+//   price: 59.99,
+//   imageUrl:
+//       'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
+// ),
+// ProductModel(
+//   id: 'p3',
+//   title: 'Yellow Scarf',
+//   description: 'Warm and cozy - exactly what you need for the winter.',
+//   price: 19.99,
+//   imageUrl: 'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
+// ),
+// ProductModel(
+//   id: 'p4',
+//   title: 'A Pan',
+//   description: 'Prepare any meal you want.',
+//   price: 49.99,
+//   imageUrl:
+//       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
+// ),
