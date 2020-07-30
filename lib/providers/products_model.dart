@@ -6,9 +6,10 @@ import './product_model.dart';
 import '../environment.dart';
 
 class ProductsModel with ChangeNotifier {
-  final authToken;
+  final String authToken;
+  final String userId;
 
-  ProductsModel(this.authToken, this._items);
+  ProductsModel(this.authToken, this.userId, this._items);
 
   List<ProductModel> _items = [];
 
@@ -25,22 +26,34 @@ class ProductsModel with ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    final response = await http.get('$firebaseEndpoint/products.json?auth=$authToken');
-    final data = json.decode(response.body) as Map<String, dynamic>;
+    var res = await http.get('$firebaseEndpoint/products.json?auth=$authToken');
+    final data = json.decode(res.body) as Map<String, dynamic>;
     final loadedProducts = <ProductModel>[];
-    if (data != null) {
-      data.forEach((id, value) {
-        loadedProducts.add(ProductModel.fromMap(id, value));
-      });
+
+    if (data == null) {
+      notifyListeners();
+      return;
     }
+
+    res = await http.get('$firebaseEndpoint/userFavorites/$userId.json?auth=$authToken');
+    final favoriteData = json.decode(res.body);
+
+    data.forEach((id, value) {
+      loadedProducts.add(
+        ProductModel.fromMap(id, {
+          ...value,
+          'isFavorite': favoriteData == null ? false : (favoriteData[id] ?? false),
+        },),
+      );
+    });
 
     _items = loadedProducts;
     notifyListeners();
   }
 
   Future<void> addProduct(ProductModel product) async {
-    final response =
-        await http.post('$firebaseEndpoint/products.json?auth=$authToken', body: json.encode(product.toMap()));
+    final url = '$firebaseEndpoint/products.json?auth=$authToken';
+    final response = await http.post(url, body: json.encode(product.toMap()));
     final id = json.decode(response.body)['name'];
     _items.add(product.copyWith(id: id));
     notifyListeners();

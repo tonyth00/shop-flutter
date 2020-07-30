@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/http_exception.dart';
+import '../environment.dart';
 
 class ProductModel with ChangeNotifier {
   final String id;
@@ -51,21 +52,17 @@ class ProductModel with ChangeNotifier {
       'description': description,
       'imageUrl': imageUrl,
       'price': price,
-      'isFavorite': isFavorite,
     };
   }
 
-  void toggleFavoriteStatus(String authToken) async {
+  void toggleFavoriteStatus(String authToken, String userId) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-
+    
+    final url = '$firebaseEndpoint/userFavorites/$userId/$id.json?auth=$authToken';
     try {
-      final res = await http.patch(
-        'https://storage-253004.firebaseio.com/products/$id.json?auth=$authToken',
-        body: json.encode({'isFavorite': isFavorite}),
-      );
-
+      final res = await http.put(url, body: json.encode(isFavorite));
       if (res.statusCode >= 400) {
         throw HttpException('Could not update isFavorite');
       }

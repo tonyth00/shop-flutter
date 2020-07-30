@@ -23,10 +23,12 @@ class OrdersScreen extends StatelessWidget {
               return Center(child: Text('An error occurred!'));
             }
             return Consumer<OrdersModel>(
-              builder: (ctx, orders, child) => ListView.builder(
-                itemCount: orders.orders.length,
-                itemBuilder: (ctx, index) => OrderListTile(orders.orders[index]),
-              ),
+              builder: (ctx, orders, child) => orders.orders.isEmpty
+                  ? Center(child: Text('No orders available'))
+                  : ListView.builder(
+                      itemCount: orders.orders.length,
+                      itemBuilder: (ctx, index) => OrderListTile(orders.orders[index]),
+                    ),
             );
           }
         },
