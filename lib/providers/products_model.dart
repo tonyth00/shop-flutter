@@ -25,8 +25,9 @@ class ProductsModel with ChangeNotifier {
     return _items.firstWhere((item) => item.id == id);
   }
 
-  Future<void> fetchProducts() async {
-    var res = await http.get('$firebaseEndpoint/products.json?auth=$authToken');
+  Future<void> fetchProducts({filterByUser = false}) async {
+    final filterString = filterByUser ? '&orderBy="creatorId"&equalTo="$userId"' : '';
+    var res = await http.get('$firebaseEndpoint/products.json?auth=$authToken$filterString');
     final data = json.decode(res.body) as Map<String, dynamic>;
     final loadedProducts = <ProductModel>[];
 
@@ -40,10 +41,13 @@ class ProductsModel with ChangeNotifier {
 
     data.forEach((id, value) {
       loadedProducts.add(
-        ProductModel.fromMap(id, {
-          ...value,
-          'isFavorite': favoriteData == null ? false : (favoriteData[id] ?? false),
-        },),
+        ProductModel.fromMap(
+          id,
+          {
+            ...value,
+            'isFavorite': favoriteData == null ? false : (favoriteData[id] ?? false),
+          },
+        ),
       );
     });
 
@@ -53,7 +57,13 @@ class ProductsModel with ChangeNotifier {
 
   Future<void> addProduct(ProductModel product) async {
     final url = '$firebaseEndpoint/products.json?auth=$authToken';
-    final response = await http.post(url, body: json.encode(product.toMap()));
+    final response = await http.post(
+      url,
+      body: json.encode({
+        ...product.toMap(),
+        'creatorId': userId,
+      }),
+    );
     final id = json.decode(response.body)['name'];
     _items.add(product.copyWith(id: id));
     notifyListeners();

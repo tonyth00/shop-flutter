@@ -10,6 +10,8 @@ class ProductModel with ChangeNotifier {
   final String description;
   final double price;
   final String imageUrl;
+  final String creatorId;
+
   bool isFavorite;
 
   ProductModel({
@@ -18,6 +20,7 @@ class ProductModel with ChangeNotifier {
     @required this.description,
     @required this.price,
     @required this.imageUrl,
+    this.creatorId,
     this.isFavorite = false,
   });
 
@@ -44,7 +47,8 @@ class ProductModel with ChangeNotifier {
         description = map['description'],
         price = map['price'],
         imageUrl = map['imageUrl'],
-        isFavorite = map['isFavorite'];
+        isFavorite = map['isFavorite'],
+        creatorId = map['creatorId'];
 
   Map<String, dynamic> toMap() {
     return {
@@ -59,7 +63,7 @@ class ProductModel with ChangeNotifier {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    
+
     final url = '$firebaseEndpoint/userFavorites/$userId/$id.json?auth=$authToken';
     try {
       final res = await http.put(url, body: json.encode(isFavorite));
