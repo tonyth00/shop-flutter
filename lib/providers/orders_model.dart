@@ -49,8 +49,9 @@ class Order {
 class OrdersModel with ChangeNotifier {
   List<Order> _orders;
   final String authToken;
+  final String userId;
   
-  OrdersModel(this.authToken, this._orders);
+  OrdersModel(this.authToken, this.userId, this._orders);
 
 
   List<Order> get orders {
@@ -64,14 +65,14 @@ class OrdersModel with ChangeNotifier {
       dateTime: DateTime.now(),
     );
 
-    final res = await http.post('$firebaseEndpoint/orders.json?auth=$authToken', body: json.encode(order.toMap()));
+    final res = await http.post('$firebaseEndpoint/orders/$userId.json?auth=$authToken', body: json.encode(order.toMap()));
     final id = json.decode(res.body)['name'];
     _orders.insert(0, order.copyWith(id: id));
     notifyListeners();
   }
 
   Future<void> fetchOrders() async {
-    final res = await http.get('$firebaseEndpoint/orders.json?auth=$authToken');
+    final res = await http.get('$firebaseEndpoint/orders/$userId.json?auth=$authToken');
     final data = json.decode(res.body) as Map<String, dynamic>;
 
     final loadedOrders = <Order>[];
