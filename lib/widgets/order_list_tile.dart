@@ -30,33 +30,31 @@ class _OrderListTileState extends State<OrderListTile> {
             trailing: IconButton(
               icon: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
               onPressed: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
+                setState(() => _isExpanded = !_isExpanded);
               },
             ),
           ),
-          if (_isExpanded)
-            Container(
-              height: min(entries.length * 20.0 + 20, 100),
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-              child: ListView.builder(
-                itemCount: entries.length,
-                itemBuilder: (ctx, index) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      entries[index].title,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '${entries[index].quantity} x \$${entries[index].price}',
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    )
-                  ],
-                ),
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            height: _isExpanded ? entries.length * 20.0 + 20 : 0,
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+            child: ListView.builder(
+              itemCount: entries.length,
+              itemBuilder: (ctx, index) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    entries[index].title,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${entries[index].quantity} x \$${entries[index].price}',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  )
+                ],
               ),
-            )
+            ),
+          )
         ],
       ),
     );
